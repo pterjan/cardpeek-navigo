@@ -1,8 +1,8 @@
 OBJECTS =  smartcard.o misc.o bytestring.o asn1.o cardtree.o gui.o config.o lua_ext.o \
 	   main.o dot_cardpeek.o
 CC = gcc
-CFLAGS = -Wall -pedantic -I /usr/include/PCSC `pkg-config lua5.1 --cflags` `pkg-config gtk+-2.0 --cflags` -c
-LFLAGS = -Wall -l pcsclite -L/usr/include/lua5.1 `pkg-config lua5.1 --libs` `pkg-config gtk+-2.0 --libs`
+CFLAGS = -Wall -pedantic `pkg-config lua libpcsclite gtk+-2.0 --cflags` -c
+LFLAGS = -Wall `pkg-config lua libpcsclite gtk+-2.0 --libs`
 
 all:			$(OBJECTS)
 			$(CC) $(LFLAGS) $(OBJECTS) -o cardpeek
