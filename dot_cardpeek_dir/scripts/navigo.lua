@@ -31,8 +31,57 @@ LFI_LIST = {
   ["2069"] = "Counters"
 }
 
+TRANSPORT_LIST = {
+  "Bus",
+  "Metro",
+  "Train/RER"
+}
+
+dofile "metro.lua"
+dofile "banlieue.lua"
+
 function en1543_parse(ctx,resp,context)
 	ui.tree_append(ctx,true,resp,nil,nil,nil)
+	if context == "Events logs" or context == "Special events" then
+
+		local min_since_midnight = card.getbits(resp, 15, 11)
+		local days_since_1997 = card.getbits(resp, 1, 14)
+		local date = os.date("%x %X", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24+min_since_midnight*60)
+		ui.tree_append(ctx,false,"Date",date,nil,nil)
+
+		local transport_id = card.getbits(resp, 53, 4)
+		local transport = TRANSPORT_LIST[transport_id+1]
+		if transport then
+			ui.tree_append(ctx,false,"Transport",transport,nil,nil)
+		end
+
+		local station
+
+		if transport_id == 1 then
+			local sector_id = card.getbits(resp, 70, 7)
+			local sector = METRO_LIST[sector_id]
+			if sector then
+				ui.tree_append(ctx,false,"Sector",sector["name"],nil,nil)
+				local station_id = card.getbits(resp, 77, 5)
+				station = sector[station_id]
+				if station then
+					ui.tree_append(ctx,false,"Station",station,nil,nil)
+				end
+			end
+		end
+
+		if transport_id == 2 then
+			local section_id = card.getbits(resp, 70, 7)
+			local section = BANLIEUE_LIST[section_id]
+			if section then
+				local station_id = card.getbits(resp, 77, 5)
+				station = section[station_id]
+				if station then
+					ui.tree_append(ctx,false,"Station",station,nil,nil)
+				end
+			end
+		end
+	end
 end
 
 function process_calypso(cardenv)
@@ -80,3 +129,4 @@ ui.tree_append(CARD,false,"Card number",card_num,4,"hex: "..hex_card_num)
 process_calypso(CARD)
 
 card.disconnect()
+

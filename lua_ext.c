@@ -249,6 +249,26 @@ int subr_bytes_size(lua_State* L)
 }
 
 
+int subr_getbits(lua_State* L)
+{
+  bytestring_t *bs = lua_tobytestring(L,1);
+  unsigned pos = (unsigned)lua_tointeger(L,2);
+  unsigned l = (unsigned)lua_tointeger(L,3);
+  unsigned len = bytestring_get_size(bs);
+  unsigned index;
+  unsigned n = 0;
+
+  for (index=pos/8;index<len && index<(pos+l+6)/8;index++)
+  {
+    n = 256*n + bytestring_get_uchar(bs,index);
+  }
+  n = n >> (8-(pos+l-1)%8)%8;
+  n = n & ((1<<l)-1);
+  bytestring_free(bs);
+  lua_pushinteger(L,n);
+  return 1;
+}
+
 /***********************************************************/
 
 int subr_tlv_split(lua_State* L)
@@ -641,6 +661,7 @@ static const struct luaL_reg cardlib [] = {
   {"bytes_unpack", subr_bytes_unpack },
   {"bytes_substr", subr_bytes_substr },
   {"bytes_size", subr_bytes_size },
+  {"getbits", subr_getbits },
   {"tlv_make", subr_tlv_make },
   {"tlv_split", subr_tlv_split },
   {"tlv_enable_single_byte_length", subr_tlv_enable_single_byte_length },
