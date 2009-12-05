@@ -17,7 +17,7 @@ dot_cardpeek.o:		dot_cardpeek_dir
 			cp -R dot_cardpeek_dir .cardpeek
 			tar cvzf dot_cardpeek.tar.gz .cardpeek
 			rm -rf .cardpeek
-			objcopy -v -B i386 -I binary -O elf32-i386 dot_cardpeek.tar.gz dot_cardpeek.o
+			$(CC) $(CFLAGS) script.S -o dot_cardpeek.o
 			rm -f dot_cardpeek.tar.gz
 
 clean:
