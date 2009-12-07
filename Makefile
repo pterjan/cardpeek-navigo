@@ -1,11 +1,18 @@
 OBJECTS =  smartcard.o misc.o bytestring.o asn1.o cardtree.o gui.o config.o lua_ext.o \
 	   main.o dot_cardpeek.o
+LUA_OBJS = 	dot_cardpeek_dir/scripts/atr.lua dot_cardpeek_dir/scripts/emv.lua \
+		dot_cardpeek_dir/scripts/moneo.lua dot_cardpeek_dir/scripts/banlieue.lua \
+		dot_cardpeek_dir/scripts/metro.lua dot_cardpeek_dir/scripts/navigo.lua \
+		dot_cardpeek_dir/scripts/lib/apdu.lua dot_cardpeek_dir/scripts/lib/tlv.lua
+
 CC = gcc
 CFLAGS = -Wall -pedantic `pkg-config --exists lua5.1 && pkg-config lua5.1 --cflags || pkg-config lua --cflags` `pkg-config libpcsclite gtk+-2.0 --cflags` -c
 LFLAGS = -Wall `pkg-config --exists lua5.1 && pkg-config lua5.1 --libs || pkg-config lua --libs` `pkg-config libpcsclite gtk+-2.0 --libs`
 
-all:			$(OBJECTS)
-			$(CC) $(LFLAGS) $(OBJECTS) -o cardpeek
+all:			cardpeek
+
+cardpeek:		$(OBJECTS)
+			$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
 %.o:			%.c %.h
 			$(CC) $(CFLAGS) $<
@@ -13,11 +20,11 @@ all:			$(OBJECTS)
 gui.o:			gui.c gui.h
 			$(CC) $(CFLAGS) -Wno-write-strings $<
 
-dot_cardpeek.o:		dot_cardpeek_dir
+dot_cardpeek.o:		$(LUA_OBJS)
 			cp -R dot_cardpeek_dir .cardpeek
 			tar cvzf dot_cardpeek.tar.gz .cardpeek
 			rm -rf .cardpeek
-			objcopy -v -B i386 -I binary -O elf32-i386 dot_cardpeek.tar.gz dot_cardpeek.o
+			$(CC) $(CFLAGS) script.S -o $@
 			rm -f dot_cardpeek.tar.gz
 
 clean:
