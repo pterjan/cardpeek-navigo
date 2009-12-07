@@ -37,6 +37,12 @@ TRANSPORT_LIST = {
   "Train/RER"
 }
 
+TRANSITION_LIST = {
+  [1] = "Entry",
+  [2] = "Exit",
+  [7] = "RER to Metro"
+}
+
 dofile "metro.lua"
 dofile "banlieue.lua"
 
@@ -59,7 +65,7 @@ function en1543_parse(ctx,resp,context)
 
 		if transport_id == 0 then
 			local bus_id = card.getbits(resp, 137, 13)
-			ui.tree_append(ctx,false,"Bus number", bus_id)
+			ui.tree_append(ctx,false,"bus number", bus_id)
 		end
 
 		if transport_id == 1 then
@@ -84,6 +90,14 @@ function en1543_parse(ctx,resp,context)
 				if station then
 					ui.tree_append(ctx,false,"Station",station,nil,nil)
 				end
+			end
+		end
+
+		if transport_id > 0 then
+			local transition_id = card.getbits(resp, 58, 4)
+			local transition = TRANSITION_LIST[transition_id]
+			if transition then
+				ui.tree_append(ctx,false,"Transition",transition,nil,nil)
 			end
 		end
 	end
