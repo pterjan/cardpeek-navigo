@@ -304,3 +304,12 @@ BANLIEUE_LIST = {
     [15] = "Dourdan|Dourdan-la-Forêt"
   }
 }
+
+BANLIEUE_NET_LIST = {
+  [1] = "RATP",
+  [2] = "Transilien Paris Est",
+  [3] = "Transilien Paris Saint-Lazare",
+  [4] = "Transilien Paris Lyon",
+  [5] = "Transilien Paris Nord",
+  [6] = "Transilien Paris Montparnasse"
+}
