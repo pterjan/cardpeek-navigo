@@ -16,17 +16,17 @@ METRO_LIST = {
   },
   [6] = {
     ["name"] = "Saint-Lazare",
-    [1] = "Malesherbes?",
-    [2] = "Monceau?",
-    [3] = "Villiers?",
-    [4] = "Quatre-Septembre?",
-    [5] = "Opéra?",
-    [6] = "Auber?",
+    [1] = "Malesherbes",
+    [2] = "Monceau",
+    [3] = "Villiers",
+    [4] = "Quatre-Septembre",
+    [5] = "Opéra",
+    [6] = "Auber",
     [7] = "Havre - Caumartin",
     [8] = "Saint-Lazare",
-    [10] = "Saint-Augustin?",
-    [12] = "Europe?",
-    [13] = "Liège?"
+    [10] = "Saint-Augustin",
+    [12] = "Europe",
+    [13] = "Liège"
   },
   [7] = {
     ["name"] = "Auteuil"
@@ -41,7 +41,7 @@ METRO_LIST = {
     ["name"] = "Invalides"
   },
   [11] = {
-    ["name"] = "Sentier?",
+    ["name"] = "Sentier",
     [1] = "Tuileries?",
     [2] = "Palais Royal - Musée du Louvre?",
     [3] = "Pyramides?",
