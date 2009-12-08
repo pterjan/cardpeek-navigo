@@ -64,8 +64,11 @@ function en1543_parse(ctx,resp,context)
 		local station
 
 		if transport_id == 0 then
+			if card.getbits(resp, 70, 1) then 
+				ui.tree_append(ctx,false,"Bus line",card.getbits(resp, 110, 8), nil, nil)
+			end
 			local bus_id = card.getbits(resp, 121+card.getbits(resp, 41, 2)*16, 13)
-			ui.tree_append(ctx,false,"Bus number", bus_id)
+			ui.tree_append(ctx,false,"Bus number", bus_id, nil, nil)
 		end
 
 		if transport_id > 0 then
