@@ -32,15 +32,19 @@ LFI_LIST = {
 }
 
 TRANSPORT_LIST = {
-  "Bus",
-  "Metro",
-  "Train/RER"
+  [1] = "Urban Bus",
+  [2] = "Interurban Bus",
+  [3] = "Metro",
+  [4] = "Tram",
+  [5] = "Train",
+  [8] = "Parking"
 }
 
 TRANSITION_LIST = {
   [1] = "Entry",
   [2] = "Exit",
-  [7] = "RER to Metro"
+  [4] = "Inspection",
+  [7] = "Interchange"
 }
 
 dofile "metro.lua"
@@ -55,7 +59,7 @@ function en1543_parse(ctx,resp,context)
 		local date = os.date("%x %X", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24+min_since_midnight*60)
 		ui.tree_append(ctx,false,"Date",date,nil,nil)
 
-		local transport_id = card.getbits(resp, 53, 4)
+		local transport_id = card.getbits(resp, 54, 4)
 		local transport = TRANSPORT_LIST[transport_id+1]
 		if transport then
 			ui.tree_append(ctx,false,"Transport",transport,nil,nil)
@@ -102,7 +106,7 @@ function en1543_parse(ctx,resp,context)
 			end
 			local transition = TRANSITION_LIST[transition_id]
 			if transition then
-				ui.tree_append(ctx,false,"Transition",transition,nil,nil)
+				ui.tree_append(ctx,false,"Event",transition,nil,nil)
 			end
 		end
 	end
