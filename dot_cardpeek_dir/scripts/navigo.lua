@@ -106,6 +106,23 @@ function en1543_parse(ctx,resp,context)
 		days_since_1997 = card.getbits(resp, 100, 14)
 		date = os.date("%x", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24)
 		ui.tree_append(ctx,false,"End",date,nil,nil)
+		local zones = card.getbits(resp, 114, 8)
+		local n = 8
+		local maxzone = 0
+		local minzone
+		while n >= 1 do
+			if zones >= 2^(n-1) then
+				if maxzone == 0 then
+					maxzone = n
+				end
+				zones = zones - 2^(n-1)
+				if zones == 0 then
+					minzone = n
+				end
+			end
+			n = n - 1
+		end
+		ui.tree_append(ctx,false,"Zones",minzone.."-"..maxzone,nil,nil)
 	end
 end
 
