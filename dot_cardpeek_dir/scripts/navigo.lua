@@ -99,6 +99,14 @@ function en1543_parse(ctx,resp,context)
 			end
 		end
 	end
+	if context == "Contracts" and card.getbits(resp, 1, 16) > 0 then
+		local days_since_1997 = card.getbits(resp, 86, 14)
+		local date = os.date("%x", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24)
+		ui.tree_append(ctx,false,"Start",date,nil,nil)
+		days_since_1997 = card.getbits(resp, 100, 14)
+		date = os.date("%x", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24)
+		ui.tree_append(ctx,false,"End",date,nil,nil)
+	end
 end
 
 function process_calypso(cardenv)
