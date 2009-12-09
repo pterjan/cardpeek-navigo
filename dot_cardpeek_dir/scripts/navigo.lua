@@ -75,12 +75,14 @@ function en1543_parse(ctx,resp,context)
 			local transition_id = card.getbits(resp, 58, 4)
 			local sector_id = card.getbits(resp, 70, 7)
 			local sector
-			if transport_id == 1 or (transport_id == 2 and transition_id == 7) then
+			if transport_id == 2 then
+				sector = BANLIEUE_LIST[sector_id]
+			end
+			if transport_id == 1 then
 				sector = METRO_LIST[sector_id]
 				ui.tree_append(ctx,false,"Sector",sector["name"],nil,nil)
 			end
 			if transport_id == 2 then
-				sector = BANLIEUE_LIST[sector_id]
 				local network = BANLIEUE_NET_LIST[math.floor(sector_id/10)]
 				if network then
 					ui.tree_append(ctx,false,"Network",network,nil,nil)
@@ -89,6 +91,11 @@ function en1543_parse(ctx,resp,context)
 			if sector then
 				local station_id = card.getbits(resp, 77, 5)
 				station = sector[station_id]
+				-- For some train stations in Paris we may lack the code while they are also metro station
+				if not station and transport_id == 2 then
+					sector = METRO_LIST[sector_id]
+					station = sector[station_id]
+				end
 				if station then
 					ui.tree_append(ctx,false,"Station",station,nil,nil)
 				end
