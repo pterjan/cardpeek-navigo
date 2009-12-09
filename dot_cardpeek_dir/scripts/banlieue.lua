@@ -1,5 +1,23 @@
 BANLIEUE_LIST = {
+  [01] = {
+    [00] = "Châtelet-Les Halles",
+    [01] = "Châtelet-Les Halles",
+    [07] = "Luxembourg"
+  },
+  [03] = {
+    [00] = "Saint-Michel Notre-Dame"
+  },
+  [06] = {
+    [00] = "Auber"
+  },
+  [14] = {
+    [04] = "Cité Universitaire"
+  },
+  [15] = {
+    [12] = "Port Royal"
+  },
   [16] = {
+    [01] = "Nation",
     [02] = "Fontenay-sous-Bois|Vincennes",
     [03] = "Joinville-le-Pont|Nogent-sur-Marne",
     [04] = "Saint-Maur Créteil",
@@ -9,12 +27,15 @@ BANLIEUE_LIST = {
     [08] = "Boissy-Saint-Léger|Sucy Bonneuil"
   },
   [17] = {
-    [05] = "Nanterre-Université|Nanterre-Ville",
+    [01] = "Charles de Gaulle-Etoile",
+    [04] = "La Défense (Grande Arche)",
+    [05] = "Nanterre-Université|Nanterre-Ville|Nanterre-Préfecture",
     [06] = "Rueil-Malmaison",
     [08] = "Chatou-Croissy",
     [09] = "Le Vésinet-Centre|Le Vésinet-Le Pecq|Saint-Germain-en-Laye"
   },
   [18] = {
+    [00] = "Denfert-Rochereau",
     [01] = "Gentilly",
     [02] = "Arcueil-Cachan|Laplace",
     [03] = "Bagneux|Bourg-la-Reine",
@@ -142,6 +163,7 @@ BANLIEUE_LIST = {
     [17] = "Boigneville|Buno-Gironville"
   },
   [41] = {
+    [00] = "Saint-Michel Notre-Dame|Musée d'Orsay",
     [01] = "Gare d'Austerlitz",
     [02] = "Bibliotheque-Francois",
     [03] = "Boulevard Masséna",
@@ -231,6 +253,9 @@ BANLIEUE_LIST = {
     [15] = "Chars|Montgeroult Courcelles|Santeuil Le Perchay|Us"
   },
   [55] = {
+    [00] = "Avenue Foch|Avenue Henri-Martin|Kennedy Radio-France|Boulainvilliers|Neuilly-Porte Maillot",
+    [01] = "Péreire-Levallois",
+    [02] = "Porte de Clichy",
     [03] = "Saint-Ouen",
     [04] = "Les Grésillons",
     [05] = "Gennevilliers",
@@ -269,6 +294,10 @@ BANLIEUE_LIST = {
     [07] = "Porchefontaine|Versailles-Rive Gauche"
   },
   [64] = {
+    [00] = "Pont de l'alma|Invalides",
+    [01] = "Champ de Mars-Tour Eiffel",
+    [02] = "Javel",
+    [03] = "Boulevard Victor - Pont du Garigliano",
     [04] = "Issy-Val de Seine",
     [05] = "Issy|Meudon-Val-Fleury"
   },
