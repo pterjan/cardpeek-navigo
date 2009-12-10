@@ -60,14 +60,14 @@ function en1543_parse(ctx,resp,context)
 		ui.tree_append(ctx,false,"Date",date,nil,nil)
 
 		local transport_id = card.getbits(resp, 54, 4)
-		local transport = TRANSPORT_LIST[transport_id+1]
+		local transport = TRANSPORT_LIST[transport_id]
 		if transport then
 			ui.tree_append(ctx,false,"Transport",transport,nil,nil)
 		end
 
 		local station
 
-		if transport_id == 0 then
+		if transport_id == 1 then
 			if card.getbits(resp, 62, 7) == 1 then 
 				ui.tree_append(ctx,false,"Bus line",card.getbits(resp, 110, 8), nil, nil)
 			end
@@ -75,18 +75,18 @@ function en1543_parse(ctx,resp,context)
 			ui.tree_append(ctx,false,"Bus number", bus_id, nil, nil)
 		end
 
-		if transport_id > 0 then
+		if transport_id == 3 or transport_id == 5 then
 			local transition_id = card.getbits(resp, 58, 4)
 			local sector_id = card.getbits(resp, 70, 7)
 			local sector
-			if transport_id == 2 then
+			if transport_id == 5 then
 				sector = BANLIEUE_LIST[sector_id]
 			end
-			if transport_id == 1 then
+			if transport_id == 3 then
 				sector = METRO_LIST[sector_id]
 				ui.tree_append(ctx,false,"Sector",sector["name"],nil,nil)
 			end
-			if transport_id == 2 then
+			if transport_id == 5 then
 				local network = BANLIEUE_NET_LIST[math.floor(sector_id/10)]
 				if network then
 					ui.tree_append(ctx,false,"Network",network,nil,nil)
