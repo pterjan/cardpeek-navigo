@@ -55,7 +55,6 @@ function en1543_parse(ctx,resp,context)
 	if context == "Environement" then
 		ui.tree_append(ctx,false,"Application Version Number", card.getbits(resp, 1, 3).."."..card.getbits(resp, 4, 3), nil, nil)
 		local bitmap = card.getbits(resp, 7, 7)
-		print ("%x", bitmap)
 		ui.tree_append(ctx,false,"Network Id", card.getbits(resp, 14, 24), nil, nil)
 		ui.tree_append(ctx,false,"Application Issuer Id", card.getbits(resp, 38, 8), nil, nil)
                 local days_since_1997 = card.getbits(resp, 46, 14)
@@ -93,54 +92,183 @@ function en1543_parse(ctx,resp,context)
 		local date = os.date("%x %X", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24+min_since_midnight*60)
 		ui.tree_append(ctx,false,"Date",date,nil,nil)
 
-		local transport_id = card.getbits(resp, 54, 4)
-		local transport = TRANSPORT_LIST[transport_id]
-		if transport then
-			ui.tree_append(ctx,false,"Transport",transport,nil,nil)
+		local bitmap = card.getbits(resp, 26, 28)
+		local pos = 54
+		if bit_and(bitmap, 1) ~= 0 then
+			ui.tree_append(ctx,false,"Display Data",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 8
 		end
-
-		local station
-
-		if transport_id == 1 then
-			if card.getbits(resp, 62, 7) == 1 then 
-				ui.tree_append(ctx,false,"Bus line",card.getbits(resp, 110, 8), nil, nil)
-			end
-			local bus_id = card.getbits(resp, 121+card.getbits(resp, 41, 2)*16, 13)
-			ui.tree_append(ctx,false,"Bus number", bus_id, nil, nil)
+		if bit_and(bitmap, bit_shl(1, 1)) ~= 0 then
+			ui.tree_append(ctx,false,"Network Id",card.getbits(resp, pos, 24),nil,nil)
+			pos = pos + 8
 		end
-
-		if transport_id == 3 or transport_id == 5 then
-			local transition_id = card.getbits(resp, 58, 4)
-			local sector_id = card.getbits(resp, 70, 7)
-			local sector
-			if transport_id == 5 then
-				sector = BANLIEUE_LIST[sector_id]
-			end
-			if transport_id == 3 then
-				sector = METRO_LIST[sector_id]
-				ui.tree_append(ctx,false,"Sector",sector["name"],nil,nil)
-			end
-			if transport_id == 5 then
-				local network = BANLIEUE_NET_LIST[math.floor(sector_id/10)]
-				if network then
-					ui.tree_append(ctx,false,"Network",network,nil,nil)
-				end
-			end
-			if sector then
-				local station_id = card.getbits(resp, 77, 5)
-				station = sector[station_id]
-				-- For some train stations in Paris we may lack the code while they are also metro station
-				if not station and transport_id == 2 then
-					sector = METRO_LIST[sector_id]
-					station = sector[station_id]
-				end
-				if station then
-					ui.tree_append(ctx,false,"Station",station,nil,nil)
-				end
+		if bit_and(bitmap, bit_shl(1, 2)) ~= 0 then
+			local transport_id = card.getbits(resp, pos, 4)
+			local transition_id = card.getbits(resp, pos+4, 4)
+			local transport = TRANSPORT_LIST[transport_id]
+			if transport then
+				ui.tree_append(ctx,false,"Transport",transport,nil,nil)
+			else
+				ui.tree_append(ctx,false,"Transport",transport_id,nil,nil)
 			end
 			local transition = TRANSITION_LIST[transition_id]
 			if transition then
 				ui.tree_append(ctx,false,"Event",transition,nil,nil)
+			else
+				ui.tree_append(ctx,false,"Event",transition_id,nil,nil)
+			end
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 3)) ~= 0 then
+			ui.tree_append(ctx,false,"Result",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 4)) ~= 0 then
+			ui.tree_append(ctx,false,"Service Provider",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 5)) ~= 0 then
+			ui.tree_append(ctx,false,"Notok Counter",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 6)) ~= 0 then
+			ui.tree_append(ctx,false,"Serial Number",card.getbits(resp, pos, 24),nil,nil)
+			pos = pos + 24
+		end
+		if bit_and(bitmap, bit_shl(1, 7)) ~= 0 then
+			ui.tree_append(ctx,false,"Destination",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 8)) ~= 0 then
+			LOC=ui.tree_append(ctx,true,"Location",card.getbits(resp, pos, 16),nil,nil)
+			local sector_id = card.getbits(resp, pos, 7)
+			local sector = BANLIEUE_LIST[sector_id]
+			if not sector then
+				sector = METRO_LIST[sector_id] 
+			end
+			if sector then
+				if sector["name"] then
+					ui.tree_append(LOC,false,"Sector",sector["name"],nil,nil)
+				end
+				local station_id = card.getbits(resp, 77, 5)
+				station = sector[station_id]
+				-- For some train stations in Paris we may lack the code while they are also metro station
+				if not station then
+					sector = METRO_LIST[sector_id]
+					station = sector[station_id]
+				end
+				if station then
+					ui.tree_append(LOC,false,"Station",station,nil,nil)
+				end
+			end
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 9)) ~= 0 then
+			if LOC then
+				ui.tree_append(LOC,false,"Gate",card.getbits(resp, pos, 8),nil,nil)
+			else
+				ui.tree_append(ctx,false,"Location Gate",card.getbits(resp, pos, 8),nil,nil)
+			end
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 10)) ~= 0 then
+			if LOC then
+				ui.tree_append(LOC,false,"Device",card.getbits(resp, pos, 16),nil,nil)
+			else
+				ui.tree_append(ctx,false,"Device",card.getbits(resp, pos, 16),nil,nil)
+			end
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 11)) ~= 0 then
+			ui.tree_append(ctx,false,"Route Number",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 12)) ~= 0 then
+			ui.tree_append(ctx,false,"Route Variant",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 13)) ~= 0 then
+			ui.tree_append(ctx,false,"Journey Run",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 14)) ~= 0 then
+			ui.tree_append(ctx,false,"Vehicle Id",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 15)) ~= 0 then
+			ui.tree_append(ctx,false,"Vehicle Class",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 5
+		end
+		if bit_and(bitmap, bit_shl(1, 16)) ~= 0 then
+			ui.tree_append(ctx,false,"Location Type",card.getbits(resp, pos, 5),nil,nil)
+			pos = pos + 5
+		end
+		if bit_and(bitmap, bit_shl(1, 17)) ~= 0 then
+			ui.tree_append(ctx,false,"Employee",card.getbits(resp, pos, 240),nil,nil)
+			pos = pos + 240
+		end
+		if bit_and(bitmap, bit_shl(1, 18)) ~= 0 then
+			ui.tree_append(ctx,false,"Location Reference",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 19)) ~= 0 then
+			ui.tree_append(ctx,false,"Journey Interchanges",card.getbits(resp, pos, 8),nil,nil)
+			pos = pos + 8
+		end
+		if bit_and(bitmap, bit_shl(1, 20)) ~= 0 then
+			ui.tree_append(ctx,false,"Period Journeys",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 21)) ~= 0 then
+			ui.tree_append(ctx,false,"Total Journeys",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 22)) ~= 0 then
+			ui.tree_append(ctx,false,"Journey Distance",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 23)) ~= 0 then
+			ui.tree_append(ctx,false,"Price Amount",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 24)) ~= 0 then
+			ui.tree_append(ctx,false,"Price Unit",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 25)) ~= 0 then
+			ui.tree_append(ctx,false,"Contract Pointer",card.getbits(resp, pos, 5),nil,nil)
+			pos = pos + 5
+		end
+		if bit_and(bitmap, bit_shl(1, 26)) ~= 0 then
+			ui.tree_append(ctx,false,"Authenticator",card.getbits(resp, pos, 16),nil,nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 27)) ~= 0 then
+			local databitmap = card.getbits(resp, pos, 5)
+			pos = pos + 5
+			if bit_and(databitmap, bit_shl(1, 0)) then
+				local days_since_1997 = card.getbits(resp, pos, 14)
+				pos = pos + 14
+				local date = os.date("%x", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*2)
+				ui.tree_append(ctx,false,"Date First Stamp", date, nil, nil)
+			end
+			if bit_and(databitmap, bit_shl(1, 1)) then
+				local min_since_midnight = card.getbits(resp, pos, 11)
+				pos = pos + 11
+				ui.tree_append(ctx,false,"Time First Stamp", math.floor(min_since_midnight/60)..":"..min_since_midnight%60, nil, nil)
+			end
+			if bit_and(databitmap, bit_shl(1, 2)) then
+				local min_since_midnight = card.getbits(resp, pos, 1)
+				ui.tree_append(ctx,false,"Simulation", card.getbits(resp, pos, 1), nil, nil)
+				pos = pos + 1
+			end
+			if bit_and(databitmap, bit_shl(1, 3)) then
+				ui.tree_append(ctx,false,"Trip", card.getbits(resp, pos, 2), nil, nil)
+				pos = pos + 2
+			end
+			if bit_and(databitmap, bit_shl(1, 4)) then
+				ui.tree_append(ctx,false,"Route Direction", card.getbits(resp, pos, 2), nil, nil)
+				pos = pos + 2
 			end
 		end
 	end
