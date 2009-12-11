@@ -47,6 +47,11 @@ TRANSITION_LIST = {
   [7] = "Interchange"
 }
 
+PROVIDER_LIST = {
+  [2] = "SNCF",
+  [3] = "RATP"
+}
+
 dofile "metro.lua"
 dofile "banlieue.lua"
 
@@ -124,7 +129,11 @@ function en1543_parse(ctx,resp,context)
 			pos = pos + 8
 		end
 		if bit_and(bitmap, bit_shl(1, 4)) ~= 0 then
-			ui.tree_append(ctx,false,"Service Provider",card.getbits(resp, pos, 8),nil,nil)
+			local provider = card.getbits(resp, pos, 8)
+			if PROVIDER_LIST[provider] then
+				provider = PROVIDER_LIST[provider]
+			end
+			ui.tree_append(ctx,false,"Service Provider",provider,nil,nil)
 			pos = pos + 8
 		end
 		if bit_and(bitmap, bit_shl(1, 5)) ~= 0 then
