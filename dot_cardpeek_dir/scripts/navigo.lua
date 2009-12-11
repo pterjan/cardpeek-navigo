@@ -52,6 +52,40 @@ dofile "banlieue.lua"
 
 function en1543_parse(ctx,resp,context)
 	ui.tree_append(ctx,true,resp,nil,nil,nil)
+	if context == "Environement" then
+		ui.tree_append(ctx,false,"Application Version Number", card.getbits(resp, 1, 3).."."..card.getbits(resp, 4, 3), nil, nil)
+		local bitmap = card.getbits(resp, 7, 7)
+		print ("%x", bitmap)
+		ui.tree_append(ctx,false,"Network Id", card.getbits(resp, 14, 24), nil, nil)
+		ui.tree_append(ctx,false,"Application Issuer Id", card.getbits(resp, 38, 8), nil, nil)
+                local days_since_1997 = card.getbits(resp, 46, 14)
+		local date = os.date("%x", os.time{year=1997, month=1, day=1, hour=0} + days_since_1997*3600*24)
+		ui.tree_append(ctx,false,"Application Validity End Date", date, nil, nil)
+		local pos = 60
+		if bit_and(bitmap, bit_shl(1, 3)) ~= 0 then
+			ui.tree_append(ctx,false,"EnvPayMethod", card.getbits(resp, pos, 11), nil, nil)
+			pos = pos + 11
+		end
+		if bit_and(bitmap, bit_shl(1, 4)) ~= 0 then
+			ui.tree_append(ctx,false,"Authenticator", card.getbits(resp, pos, 16), nil, nil)
+			pos = pos + 16
+		end
+		if bit_and(bitmap, bit_shl(1, 5)) ~= 0 then
+			ui.tree_append(ctx,false,"Select List", card.getbits(resp, pos, 32), nil, nil)
+			pos = pos + 32
+		end
+		if bit_and(bitmap, bit_shl(1, 6)) ~= 0 then
+			local databitmap = card.getbits(resp, pos, 2)
+			pos = pos + 2
+			if bit_and(databitmap,1) then
+				ui.tree_append(ctx,false,"Data Card Status", card.getbits(resp, pos, 1), nil, nil)
+				pos = pos + 1
+			end
+			if bit_and(databitmap,2) then
+				ui.tree_append(ctx,false,"Data2", card.getbits(resp, pos, 29*4-pos+1), nil, nil)
+			end
+		end
+	end
 	if context == "Events logs" or context == "Special events" then
 
 		local min_since_midnight = card.getbits(resp, 15, 11)
