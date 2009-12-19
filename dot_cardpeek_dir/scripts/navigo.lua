@@ -44,7 +44,8 @@ TRANSITION_LIST = {
   [1] = "Entry",
   [2] = "Exit",
   [4] = "Inspection",
-  [7] = "Interchange"
+  [6] = "Interchange (entry)",
+  [7] = "Interchange (exit)"
 }
 
 PROVIDER_LIST = {
