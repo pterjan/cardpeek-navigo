@@ -164,7 +164,9 @@ function en1543_parse(ctx,resp,context)
 				-- For some train stations in Paris we may lack the code while they are also metro station
 				if not station then
 					sector = METRO_LIST[sector_id]
-					station = sector[station_id]
+					if sector then
+						station = sector[station_id]
+					end
 				end
 				if station then
 					ui.tree_append(LOC,false,"Station",station,nil,nil)
