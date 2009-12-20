@@ -41,7 +41,6 @@ unsigned short null_transmit(cardreader_t* cr,
 
 bytestring_t* null_last_atr(cardreader_t* cr)
 {
-  null_last_atr(cr);
   return bytestring_new();
 }
 
