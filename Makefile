@@ -11,6 +11,8 @@ LFLAGS = -Wall `pkg-config --exists lua5.1 && pkg-config lua5.1 --libs || pkg-co
 
 all:			cardpeek
 
+smartcard.o:	smartcard.c drivers/null_driver.c drivers/pcsc_driver.c
+
 cardpeek:		$(OBJECTS)
 			$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
