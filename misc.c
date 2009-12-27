@@ -62,7 +62,7 @@ int log_printf(int level, const char *format, ...)
   unsigned len_buf;
 
   va_start(al,format);
-  len_buf = vsnprintf(buf,0,format,al);
+  len_buf = vsnprintf(NULL,0,format,al);
   buf = (char *)malloc(len_buf+24);
   if (level==LOG_DEBUG)
     sprintf(buf,"%04i DEBUG   ",logpos++);
