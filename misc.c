@@ -63,6 +63,7 @@ int log_printf(int level, const char *format, ...)
 
   va_start(al,format);
   len_buf = vsnprintf(NULL,0,format,al);
+  va_end(al);
   buf = (char *)malloc(len_buf+24);
   if (level==LOG_DEBUG)
     sprintf(buf,"%04i DEBUG   ",logpos++);
@@ -73,6 +74,7 @@ int log_printf(int level, const char *format, ...)
   else if (level==LOG_ERROR)
     sprintf(buf,"%04i ERROR   ",logpos++);
 
+  va_start(al,format);
   vsprintf(buf+strlen(buf),format,al);
   strcat(buf,"\n");
   if (LOGFUNCTION)
@@ -204,12 +206,14 @@ int a_sprintf(a_string_t* cs, const char *format, ...)
 
   va_start(al,format);
   reclen=vsnprintf(cs->_data,0,format,al);
+  va_end(al);
   if (reclen+1>cs->_alloc)
   {
     cs->_alloc=reclen+1;
     free(cs->_data);
     cs->_data=(char *)malloc(cs->_alloc);
   }
+  va_start(al,format);
   vsnprintf(cs->_data,reclen+1,format,al);
   cs->_size=reclen+1;
   va_end(al);
